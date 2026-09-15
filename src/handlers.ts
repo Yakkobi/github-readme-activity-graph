@@ -13,6 +13,14 @@ export class Handlers {
         try {
             const utils = new Utilities(req.query);
 
+            const whitelist = process.env.WHITELIST;
+            if (whitelist && utils.username.toLowerCase() !== whitelist.toLowerCase()) {
+                res.setHeader('Cache-Control', 'no-store, max-age=0');
+                res.setHeader('Content-Type', 'image/svg+xml');
+                res.send(invalidUserSvg('This user is not whitelisted'));
+                return;
+            }
+
             const fetcher = new Fetcher(utils.username);
             const queryOptions = utils.queryOptions();
             const fetchCalendarData = await fetcher.fetchContributions(
